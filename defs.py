@@ -2,6 +2,7 @@ import vk_api
 from vk_api.keyboard import VkKeyboard, VkKeyboardColor
 from data.mailing import Mailing
 from data.tests import Tests
+from data.facts import Facts
 from data import db_session
 import datetime
 import random
@@ -37,9 +38,27 @@ def add_mailing(id, how_often):
     session.commit()
 
 
+def add_facts(id, how_often):
+    """Добавление пользователя в список рассылок фактов"""
+
+    fact = Facts()
+    fact.id = id
+    fact.how_often = how_often
+    fact.next_send = datetime.datetime.now() + datetime.timedelta(days=(7 / how_often))
+    session = db_session.create_session()
+    session.add(fact)
+    session.commit()
+
+
 def del_mailing(id):
     session = db_session.create_session()
     session.query(Mailing).filter(Mailing.id == id).delete()
+    session.commit()
+
+
+def del_fact(id):
+    session = db_session.create_session()
+    session.query(Facts).filter(Facts.id == id).delete()
     session.commit()
 
 

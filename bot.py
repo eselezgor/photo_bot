@@ -3,9 +3,9 @@ from vk_api.bot_longpoll import VkBotLongPoll, VkBotEventType
 import random
 from vk_api import VkUpload
 from vk_api.keyboard import VkKeyboard
-from defs import add_button, add_mailing, mailing_check, get_photo, del_mailing, get_random_test
+from defs import add_button, add_mailing, mailing_check, get_photo, del_mailing, get_random_test, add_facts, del_fact
 import os.path
-from data import db_session, mailing
+from data import db_session, mailing, facts
 
 id_group = -194151011
 id_album = 271928593
@@ -15,7 +15,7 @@ def main():
     vk_session = vk_api.VkApi(
         token='ab948e1d036b8d2e340bd6e2e66799330708cb59317956632f06a93d4f18f2ad6d89d51cb6683f0479cbd')
 
-    menu_type = 'main_menu'  # main_menu, test, photo_category, mailing
+    menu_type = 'main_menu'  # main_menu, test, photo_category, mailing, facts
 
     longpoll = VkBotLongPoll(vk_session, 194151011)
 
@@ -78,6 +78,13 @@ def main():
                                  random_id=random.randint(0, 2 ** 64))
                 menu_type = 'mailing'
 
+            elif text == 'Отписаться от рассылки' and menu_type == 'mailing':
+                del_mailing(event.obj.message['from_id'])
+                vk.messages.send(user_id=event.obj.message['from_id'],
+                                 message=('Вы отписались от рассылки'),
+                                 random_id=random.randint(0, 2 ** 64))
+                menu_type = 'main_menu'
+
             elif menu_type == 'mailing':
                 db_session.global_init("db/mailing.sqlite")
 
@@ -100,13 +107,6 @@ def main():
                 add_mailing(event.obj.message['from_id'], times_a_week)
                 vk.messages.send(user_id=event.obj.message['from_id'],
                                  message=(text_message),
-                                 random_id=random.randint(0, 2 ** 64))
-                menu_type = 'main_menu'
-
-            elif text == 'Отписаться от рассылки':
-                del_mailing(event.obj.message['from_id'])
-                vk.messages.send(user_id=event.obj.message['from_id'],
-                                 message=('Вы отписались от рассылки'),
                                  random_id=random.randint(0, 2 ** 64))
                 menu_type = 'main_menu'
 
@@ -140,8 +140,46 @@ def main():
                 menu_type = 'main_menu'
 
             elif text == 'Рассылка интересных фактов про фото':
+                keyboard = add_button(keyboard, 'Каждый день', new_line=False)
+                keyboard = add_button(keyboard, 'Два раза в неделю')
+                keyboard = add_button(keyboard, 'Раз в неделю')
+                keyboard = add_button(keyboard, 'Отписаться от рассылки')
                 vk.messages.send(user_id=event.obj.message['from_id'],
-                                 message=('Извините, эта функция пока не поддерживается'),
+                                 message=('Выберите частоту'),
+                                 keyboard=keyboard.get_keyboard(),
+                                 random_id=random.randint(0, 2 ** 64))
+                menu_type = 'facts'
+
+            elif text == 'Отписаться от рассылки' and menu_type == 'facts':
+                del_fact(event.obj.message['from_id'])
+                vk.messages.send(user_id=event.obj.message['from_id'],
+                                 message=('Вы отписались от рассылки'),
+                                 random_id=random.randint(0, 2 ** 64))
+                menu_type = 'main_menu'
+
+            elif menu_type == 'facts':
+                db_session.global_init("db/mailing.sqlite")
+
+                if text == 'Каждый день':
+                    times_a_week = 7
+                elif text == 'Два раза в неделю':
+                    times_a_week = 2
+                else:
+                    times_a_week = 1
+
+                session = db_session.create_session()
+                text_message = 'Вы подписались на рассылку интересных фактов {}. Чтобы отменить рассылку, выберите ' \
+                               '"Отисаться от' \
+                               ' рассылки" в меню "Интересные факты про фото"'.format(text.lower())
+                for user in session.query(facts.Facts).all():
+                    if user.id == event.obj.message['from_id']:
+                        del_fact(event.obj.message['from_id'])
+                        text_message = 'Вы поменяли частоту рассылки на {}. Чтобы отменить рассылку, выберите ' \
+                                       '"Отисаться от рассылки" в меню "Рассылка фото"'.format(text.lower())
+                        break
+                add_facts(event.obj.message['from_id'], times_a_week)
+                vk.messages.send(user_id=event.obj.message['from_id'],
+                                 message=(text_message),
                                  random_id=random.randint(0, 2 ** 64))
                 menu_type = 'main_menu'
 
