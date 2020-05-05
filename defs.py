@@ -79,6 +79,15 @@ def mailing_check():
     return ''
 
 
+def facts_check():
+     session = db_session.create_session()
+     for fact in session.query(Tests).all():
+         if fact.next_send <= datetime.datetime.now():
+             fact.next_send = datetime.datetime.now() + datetime.timedelta(days=(7 / fact.how_often))
+             return fact.id
+     return ''
+
+
 def get_random_test():
     """Получение случайного теста"""
 

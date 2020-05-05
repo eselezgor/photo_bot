@@ -3,7 +3,8 @@ from vk_api.bot_longpoll import VkBotLongPoll, VkBotEventType
 import random
 from vk_api import VkUpload
 from vk_api.keyboard import VkKeyboard
-from defs import add_button, add_mailing, mailing_check, get_photo, del_mailing, get_random_test, add_facts, del_fact
+from defs import add_button, add_mailing, mailing_check, get_photo, del_mailing, get_random_test, add_facts, del_fact, \
+    facts_check
 import os.path
 from data import db_session, mailing, facts
 
@@ -28,6 +29,15 @@ def main():
             vk.messages.send(user_id=id,
                              message=('Здравствуйте! Рассылка фото'),
                              attachment=random.choice(get_photo(id_group, id_album)),
+                             random_id=random.randint(0, 2 ** 64))
+
+        id = facts_check()
+        if not id == '':
+            vk = vk_session.get_api()
+            f = open('static/facts.txt', 'r')
+            one_fact = f.read().split('**')
+            vk.messages.send(user_id=id,
+                             message=(one_fact),
                              random_id=random.randint(0, 2 ** 64))
 
         if event.type == VkBotEventType.MESSAGE_NEW:
