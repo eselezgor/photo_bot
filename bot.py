@@ -7,6 +7,7 @@ from defs import add_button, add_mailing, mailing_check, get_photo, del_mailing,
     facts_check, get_random_game
 import os.path
 from data import db_session, mailing, facts
+import codecs
 
 id_group = -194151011
 id_album = 271928593
@@ -35,7 +36,7 @@ def main():
         if not id == '':
             vk = vk_session.get_api()
             try:
-                f = open('static/facts.txt', 'r')
+                f = codecs.open('static/facts.txt', 'r')
                 one_fact = f.read().split('**')
                 vk.messages.send(user_id=id,
                                  message=(one_fact),
