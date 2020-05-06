@@ -34,11 +34,14 @@ def main():
         id = facts_check()
         if not id == '':
             vk = vk_session.get_api()
-            f = open('static/facts.txt', 'r')
-            one_fact = f.read().split('**')
-            vk.messages.send(user_id=id,
-                             message=(one_fact),
-                             random_id=random.randint(0, 2 ** 64))
+            try:
+                f = open('static/facts.txt', 'r')
+                one_fact = f.read().split('**')
+                vk.messages.send(user_id=id,
+                                 message=(one_fact),
+                                 random_id=random.randint(0, 2 ** 64))
+            except UnicodeDecodeError:
+                print('Опять какая-то непонятная ошибка')
 
         if event.type == VkBotEventType.MESSAGE_NEW:
             vk = vk_session.get_api()
