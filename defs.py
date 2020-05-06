@@ -3,6 +3,7 @@ from vk_api.keyboard import VkKeyboard, VkKeyboardColor
 from data.mailing import Mailing
 from data.tests import Tests
 from data.facts import Facts
+from data.games import Games
 from data import db_session
 import datetime
 import random
@@ -81,7 +82,7 @@ def mailing_check():
 
 def facts_check():
      session = db_session.create_session()
-     for fact in session.query(Tests).all():
+     for fact in session.query(Facts).all():
          if fact.next_send <= datetime.datetime.now():
              fact.next_send = datetime.datetime.now() + datetime.timedelta(days=(7 / fact.how_often))
              return fact.id
@@ -94,6 +95,14 @@ def get_random_test():
     session = db_session.create_session()
     test = random.choice(session.query(Tests).all())
     return [test.question, test.answer_choice, test.answer]
+
+
+def get_random_game():
+    """Случайная мини-игра"""
+
+    session = db_session.create_session()
+    games = random.choice(session.query(Games).all())
+    return [games.image, games.question, games.answer_choice, games.answer]
 
 
 def add_button(keyboard, text, new_line=True):
