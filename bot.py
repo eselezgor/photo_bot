@@ -25,7 +25,7 @@ def main():
     print(1)
 
     for event in longpoll.listen():
-        if True:
+        try:
 
             id = mailing_check()
             if not id == '':
@@ -287,6 +287,8 @@ def main():
                                              random_id=random.randint(0, 2 ** 64))
                     except Exception as e:
                         print(e)
+        except Exception as e:
+            print(e)
 
 
 if __name__ == '__main__':
