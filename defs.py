@@ -90,6 +90,7 @@ def facts_check():
         return ''
     except Exception as e:
         print(e)
+        return ''
 
 
 def get_random_test():
