@@ -22,6 +22,7 @@ def main():
     longpoll = VkBotLongPoll(vk_session, 194151011)
 
     db_session.global_init("db/mailing.sqlite")
+    print(1)
 
     for event in longpoll.listen():
         try:
