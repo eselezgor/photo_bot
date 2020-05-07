@@ -21,9 +21,10 @@ def main():
 
     longpoll = VkBotLongPoll(vk_session, 194151011)
 
+    db_session.global_init("db/mailing.sqlite")
+
     for event in longpoll.listen():
 
-        db_session.global_init("db/mailing.sqlite")
         id = mailing_check()
         if not id == '':
             try:
@@ -117,7 +118,6 @@ def main():
                 menu_type = 'main_menu'
 
             elif menu_type == 'mailing':
-                db_session.global_init("db/mailing.sqlite")
                 try:
                     if text == 'Каждый день':
                         times_a_week = 7
@@ -144,7 +144,6 @@ def main():
                 menu_type = 'main_menu'
 
             elif text == 'Тесты про фотографию':
-                db_session.global_init("db/mailing.sqlite")
                 try:
                     test = get_random_test()
                     answer_choice = test[1].split('**')
@@ -204,7 +203,6 @@ def main():
                 menu_type = 'main_menu'
 
             elif menu_type == 'facts':
-                db_session.global_init("db/mailing.sqlite")
                 try:
                     if text == 'Каждый день':
                         times_a_week = 7
@@ -232,7 +230,6 @@ def main():
                 menu_type = 'main_menu'
 
             elif text == 'Игры на внимательность':
-                db_session.global_init("db/mailing.sqlite")
                 try:
                     game = get_random_game()
                     answer_choice = game[2].split('**')
