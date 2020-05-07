@@ -47,8 +47,8 @@ def main():
                     vk.messages.send(user_id=id,
                                      message=(random.choice(one_fact)),
                                      random_id=random.randint(0, 2 ** 64))
-                except UnicodeDecodeError:
-                    print('Опять какая-то непонятная ошибка')
+                except Exception as e:
+                    print(e)
 
             if event.type == VkBotEventType.MESSAGE_NEW:
                 vk = vk_session.get_api()
