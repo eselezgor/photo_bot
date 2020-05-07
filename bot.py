@@ -42,8 +42,9 @@ def main():
                 id = facts_check()
                 if not id == '':
                     vk = vk_session.get_api()
-                    f = codecs.open('static/facts.txt', 'r')
+                    f = codecs.open('static/facts.txt', 'r', 'utf_8_sig')
                     one_fact = f.read().split('**')
+                    f.close()
                     vk.messages.send(user_id=id,
                                      message=(random.choice(one_fact)),
                                      random_id=random.randint(0, 2 ** 64))

@@ -88,6 +88,8 @@ def facts_check():
         for fact in session.query(Facts).all():
             if fact.next_send <= datetime.datetime.now():
                 fact.next_send = datetime.datetime.now() + datetime.timedelta(days=(7 / fact.how_often))
+                fact.last_send = datetime.datetime.now()
+                session.commit()
                 return fact.id
         return ''
     except Exception as e:
