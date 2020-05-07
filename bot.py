@@ -26,11 +26,14 @@ def main():
         db_session.global_init("db/mailing.sqlite")
         id = mailing_check()
         if not id == '':
-            vk = vk_session.get_api()
-            vk.messages.send(user_id=id,
-                             message=('Здравствуйте! Рассылка фото'),
-                             attachment=random.choice(get_photo(id_group, id_album)),
-                             random_id=random.randint(0, 2 ** 64))
+            try:
+                vk = vk_session.get_api()
+                vk.messages.send(user_id=id,
+                                 message=('Здравствуйте! Рассылка фото'),
+                                 attachment=random.choice(get_photo(id_group, id_album)),
+                                 random_id=random.randint(0, 2 ** 64))
+            except Exception as e:
+                print(e)
 
         id = facts_check()
         if not id == '':
@@ -51,179 +54,217 @@ def main():
             keyboard = VkKeyboard(one_time=True)
 
             if text == 'Фото по категориям':
-                keyboard = add_button(keyboard, 'Города', new_line=False)
-                keyboard = add_button(keyboard, 'Игры')
-                keyboard = add_button(keyboard, 'Горы')
-                vk.messages.send(user_id=event.obj.message['from_id'],
-                                 message=('Выберите категорию'),
-                                 keyboard=keyboard.get_keyboard(),
-                                 random_id=random.randint(0, 2 ** 64))
-                menu_type = 'photo_category'
+                try:
+                    keyboard = add_button(keyboard, 'Города', new_line=False)
+                    keyboard = add_button(keyboard, 'Игры')
+                    keyboard = add_button(keyboard, 'Горы')
+                    vk.messages.send(user_id=event.obj.message['from_id'],
+                                     message=('Выберите категорию'),
+                                     keyboard=keyboard.get_keyboard(),
+                                     random_id=random.randint(0, 2 ** 64))
+                    menu_type = 'photo_category'
+                except Exception as e:
+                    print(e)
+                    menu_type = 'main_menu'
 
             elif menu_type == 'photo_category':
-                up = VkUpload(vk)
-                if text == 'Города':
-                    group = 'cities'
-                elif text == 'Горы':
-                    group = 'mountains'
-                else:
-                    group = 'games'
+                try:
+                    up = VkUpload(vk)
+                    if text == 'Города':
+                        group = 'cities'
+                    elif text == 'Горы':
+                        group = 'mountains'
+                    else:
+                        group = 'games'
 
-                # Подсчёт количества файлов в папке
-                path = 'static/img/{}'.format(group)
-                num_files = len([f for f in os.listdir(path)
-                                 if os.path.isfile(os.path.join(path, f))])
+                    # Подсчёт количества файлов в папке
+                    path = 'static/img/{}'.format(group)
+                    num_files = len([f for f in os.listdir(path)
+                                     if os.path.isfile(os.path.join(path, f))])
 
-                mes = up.photo_messages('static/img/{}/pic{}.jpg'.format(group, str(random.randint(1, num_files))))[0]
-                vk.messages.send(user_id=event.obj.message['from_id'],
-                                 message=(''),
-                                 attachment=f"photo{mes['owner_id']}_{mes['id']}",
-                                 random_id=random.randint(0, 2 ** 64))
+                    mes = up.photo_messages('static/img/{}/pic{}.jpg'.format(group, str(random.randint(1, num_files))))[0]
+                    vk.messages.send(user_id=event.obj.message['from_id'],
+                                     message=(''),
+                                     attachment=f"photo{mes['owner_id']}_{mes['id']}",
+                                     random_id=random.randint(0, 2 ** 64))
+                except Exception as e:
+                    print(e)
                 menu_type = 'main_menu'
 
             elif text == 'Рассылка фото':
-                keyboard = add_button(keyboard, 'Каждый день', new_line=False)
-                keyboard = add_button(keyboard, 'Два раза в неделю')
-                keyboard = add_button(keyboard, 'Раз в неделю')
-                keyboard = add_button(keyboard, 'Отписаться от рассылки')
-                vk.messages.send(user_id=event.obj.message['from_id'],
-                                 message=('Выберите частоту'),
-                                 keyboard=keyboard.get_keyboard(),
-                                 random_id=random.randint(0, 2 ** 64))
-                menu_type = 'mailing'
+                try:
+                    keyboard = add_button(keyboard, 'Каждый день', new_line=False)
+                    keyboard = add_button(keyboard, 'Два раза в неделю')
+                    keyboard = add_button(keyboard, 'Раз в неделю')
+                    keyboard = add_button(keyboard, 'Отписаться от рассылки')
+                    vk.messages.send(user_id=event.obj.message['from_id'],
+                                     message=('Выберите частоту'),
+                                     keyboard=keyboard.get_keyboard(),
+                                     random_id=random.randint(0, 2 ** 64))
+                    menu_type = 'mailing'
+                except Exception as e:
+                    print(e)
+                    menu_type = 'main_menu'
 
             elif text == 'Отписаться от рассылки' and menu_type == 'mailing':
-                del_mailing(event.obj.message['from_id'])
-                vk.messages.send(user_id=event.obj.message['from_id'],
-                                 message=('Вы отписались от рассылки'),
-                                 random_id=random.randint(0, 2 ** 64))
+                try:
+                    del_mailing(event.obj.message['from_id'])
+                    vk.messages.send(user_id=event.obj.message['from_id'],
+                                     message=('Вы отписались от рассылки'),
+                                     random_id=random.randint(0, 2 ** 64))
+                except Exception as e:
+                    print(e)
                 menu_type = 'main_menu'
 
             elif menu_type == 'mailing':
                 db_session.global_init("db/mailing.sqlite")
+                try:
+                    if text == 'Каждый день':
+                        times_a_week = 7
+                    elif text == 'Два раза в неделю':
+                        times_a_week = 2
+                    else:
+                        times_a_week = 1
 
-                if text == 'Каждый день':
-                    times_a_week = 7
-                elif text == 'Два раза в неделю':
-                    times_a_week = 2
-                else:
-                    times_a_week = 1
-
-                session = db_session.create_session()
-                text_message = 'Вы подписались на рассылку фото {}. Чтобы отменить рассылку, выберите "Отисаться от' \
-                               ' рассылки" в меню "Рассылка фото"'.format(text.lower())
-                for user in session.query(mailing.Mailing).all():
-                    if user.id == event.obj.message['from_id']:
-                        del_mailing(event.obj.message['from_id'])
-                        text_message = 'Вы поменяли частоту рассылки на {}. Чтобы отменить рассылку, выберите ' \
-                                       '"Отисаться от рассылки" в меню "Рассылка фото"'.format(text.lower())
-                        break
-                add_mailing(event.obj.message['from_id'], times_a_week)
-                vk.messages.send(user_id=event.obj.message['from_id'],
-                                 message=(text_message),
-                                 random_id=random.randint(0, 2 ** 64))
+                    session = db_session.create_session()
+                    text_message = 'Вы подписались на рассылку фото {}. Чтобы отменить рассылку, выберите "Отисаться от' \
+                                   ' рассылки" в меню "Рассылка фото"'.format(text.lower())
+                    for user in session.query(mailing.Mailing).all():
+                        if user.id == event.obj.message['from_id']:
+                            del_mailing(event.obj.message['from_id'])
+                            text_message = 'Вы поменяли частоту рассылки на {}. Чтобы отменить рассылку, выберите ' \
+                                           '"Отисаться от рассылки" в меню "Рассылка фото"'.format(text.lower())
+                            break
+                    add_mailing(event.obj.message['from_id'], times_a_week)
+                    vk.messages.send(user_id=event.obj.message['from_id'],
+                                     message=(text_message),
+                                     random_id=random.randint(0, 2 ** 64))
+                except Exception as e:
+                    print(e)
                 menu_type = 'main_menu'
 
             elif text == 'Тесты про фотографию':
-
                 db_session.global_init("db/mailing.sqlite")
-                test = get_random_test()
-                answer_choice = test[1].split('**')
-                keyboard = add_button(keyboard, answer_choice[0], new_line=False)
-                keyboard = add_button(keyboard, answer_choice[1])
-                keyboard = add_button(keyboard, answer_choice[2])
-                keyboard = add_button(keyboard, answer_choice[3])
+                try:
+                    test = get_random_test()
+                    answer_choice = test[1].split('**')
+                    keyboard = add_button(keyboard, answer_choice[0], new_line=False)
+                    keyboard = add_button(keyboard, answer_choice[1])
+                    keyboard = add_button(keyboard, answer_choice[2])
+                    keyboard = add_button(keyboard, answer_choice[3])
 
-                vk.messages.send(user_id=event.obj.message['from_id'],
-                                 message=(test[0]),
-                                 keyboard=keyboard.get_keyboard(),
-                                 random_id=random.randint(0, 2 ** 64))
-                answer = test[2]
-                menu_type = 'test'
+                    vk.messages.send(user_id=event.obj.message['from_id'],
+                                     message=(test[0]),
+                                     keyboard=keyboard.get_keyboard(),
+                                     random_id=random.randint(0, 2 ** 64))
+                    answer = test[2]
+                    menu_type = 'test'
+                except Exception as e:
+                    print(e)
+                    menu_type = 'main_menu'
 
             elif menu_type == 'test':
-                if text == answer:
-                    vk.messages.send(user_id=event.obj.message['from_id'],
-                                     message=('Поздравляем! Вы ответили правильно!'),
-                                     random_id=random.randint(0, 2 ** 64))
-                else:
-                    vk.messages.send(user_id=event.obj.message['from_id'],
-                                     message=('К сожалению, Вы ошиблись. Правильный ответ: {}'.format(answer)),
-                                     random_id=random.randint(0, 2 ** 64))
+                try:
+                    if text == answer:
+                        vk.messages.send(user_id=event.obj.message['from_id'],
+                                         message=('Поздравляем! Вы ответили правильно!'),
+                                         random_id=random.randint(0, 2 ** 64))
+                    else:
+                        vk.messages.send(user_id=event.obj.message['from_id'],
+                                         message=('К сожалению, Вы ошиблись. Правильный ответ: {}'.format(answer)),
+                                         random_id=random.randint(0, 2 ** 64))
+                except Exception as e:
+                    print(e)
 
                 menu_type = 'main_menu'
 
             elif text == 'Рассылка интересных фактов про фото':
-                keyboard = add_button(keyboard, 'Каждый день', new_line=False)
-                keyboard = add_button(keyboard, 'Два раза в неделю')
-                keyboard = add_button(keyboard, 'Раз в неделю')
-                keyboard = add_button(keyboard, 'Отписаться от рассылки')
-                vk.messages.send(user_id=event.obj.message['from_id'],
-                                 message=('Выберите частоту'),
-                                 keyboard=keyboard.get_keyboard(),
-                                 random_id=random.randint(0, 2 ** 64))
-                menu_type = 'facts'
+                try:
+                    keyboard = add_button(keyboard, 'Каждый день', new_line=False)
+                    keyboard = add_button(keyboard, 'Два раза в неделю')
+                    keyboard = add_button(keyboard, 'Раз в неделю')
+                    keyboard = add_button(keyboard, 'Отписаться от рассылки')
+                    vk.messages.send(user_id=event.obj.message['from_id'],
+                                     message=('Выберите частоту'),
+                                     keyboard=keyboard.get_keyboard(),
+                                     random_id=random.randint(0, 2 ** 64))
+                    menu_type = 'facts'
+                except Exception as e:
+                    print(e)
+                    menu_type = 'main_menu'
 
             elif text == 'Отписаться от рассылки' and menu_type == 'facts':
-                del_fact(event.obj.message['from_id'])
-                vk.messages.send(user_id=event.obj.message['from_id'],
-                                 message=('Вы отписались от рассылки'),
-                                 random_id=random.randint(0, 2 ** 64))
+                try:
+                    del_fact(event.obj.message['from_id'])
+                    vk.messages.send(user_id=event.obj.message['from_id'],
+                                     message=('Вы отписались от рассылки'),
+                                     random_id=random.randint(0, 2 ** 64))
+                except Exception as e:
+                    print(e)
                 menu_type = 'main_menu'
 
             elif menu_type == 'facts':
                 db_session.global_init("db/mailing.sqlite")
+                try:
+                    if text == 'Каждый день':
+                        times_a_week = 7
+                    elif text == 'Два раза в неделю':
+                        times_a_week = 2
+                    else:
+                        times_a_week = 1
 
-                if text == 'Каждый день':
-                    times_a_week = 7
-                elif text == 'Два раза в неделю':
-                    times_a_week = 2
-                else:
-                    times_a_week = 1
-
-                session = db_session.create_session()
-                text_message = 'Вы подписались на рассылку интересных фактов {}. Чтобы отменить рассылку, выберите ' \
-                               '"Отисаться от' \
-                               ' рассылки" в меню "Интересные факты про фото"'.format(text.lower())
-                for user in session.query(facts.Facts).all():
-                    if user.id == event.obj.message['from_id']:
-                        del_fact(event.obj.message['from_id'])
-                        text_message = 'Вы поменяли частоту рассылки на {}. Чтобы отменить рассылку, выберите ' \
-                                       '"Отисаться от рассылки" в меню "Рассылка фото"'.format(text.lower())
-                        break
-                add_facts(event.obj.message['from_id'], times_a_week)
-                vk.messages.send(user_id=event.obj.message['from_id'],
-                                 message=(text_message),
-                                 random_id=random.randint(0, 2 ** 64))
+                    session = db_session.create_session()
+                    text_message = 'Вы подписались на рассылку интересных фактов {}. Чтобы отменить рассылку, выберите ' \
+                                   '"Отисаться от' \
+                                   ' рассылки" в меню "Интересные факты про фото"'.format(text.lower())
+                    for user in session.query(facts.Facts).all():
+                        if user.id == event.obj.message['from_id']:
+                            del_fact(event.obj.message['from_id'])
+                            text_message = 'Вы поменяли частоту рассылки на {}. Чтобы отменить рассылку, выберите ' \
+                                           '"Отисаться от рассылки" в меню "Рассылка фото"'.format(text.lower())
+                            break
+                    add_facts(event.obj.message['from_id'], times_a_week)
+                    vk.messages.send(user_id=event.obj.message['from_id'],
+                                     message=(text_message),
+                                     random_id=random.randint(0, 2 ** 64))
+                except Exception as e:
+                    print(e)
                 menu_type = 'main_menu'
 
             elif text == 'Игры на внимательность':
                 db_session.global_init("db/mailing.sqlite")
-                game = get_random_game()
-                answer_choice = game[2].split('**')
-                keyboard = add_button(keyboard, answer_choice[0], new_line=False)
-                keyboard = add_button(keyboard, answer_choice[1])
-                keyboard = add_button(keyboard, answer_choice[2])
-                keyboard = add_button(keyboard, answer_choice[3])
+                try:
+                    game = get_random_game()
+                    answer_choice = game[2].split('**')
+                    keyboard = add_button(keyboard, answer_choice[0], new_line=False)
+                    keyboard = add_button(keyboard, answer_choice[1])
+                    keyboard = add_button(keyboard, answer_choice[2])
+                    keyboard = add_button(keyboard, answer_choice[3])
 
-                vk.messages.send(user_id=event.obj.message['from_id'],
-                                 message=(game[1]),
-                                 attachment='static/games/{}'.format(game[0]),
-                                 keyboard=keyboard.get_keyboard(),
-                                 random_id=random.randint(0, 2 ** 64))
-                answer = game[3]
-                menu_type = 'game'
+                    vk.messages.send(user_id=event.obj.message['from_id'],
+                                     message=(game[1]),
+                                     attachment='static/games/{}'.format(game[0]),
+                                     keyboard=keyboard.get_keyboard(),
+                                     random_id=random.randint(0, 2 ** 64))
+                    answer = game[3]
+                    menu_type = 'game'
+                except Exception as e:
+                    print(e)
+                    menu_type = 'main_menu'
 
             elif menu_type == 'game':
-                if text == answer:
-                    vk.messages.send(user_id=event.obj.message['from_id'],
-                                     message=('Поздравляем! Вы ответили правильно!'),
-                                     random_id=random.randint(0, 2 ** 64))
-                else:
-                    vk.messages.send(user_id=event.obj.message['from_id'],
-                                     message=('К сожалению, Вы ошиблись. Правильный ответ: {}'.format(answer)),
-                                     random_id=random.randint(0, 2 ** 64))
+                try:
+                    if text == answer:
+                        vk.messages.send(user_id=event.obj.message['from_id'],
+                                         message=('Поздравляем! Вы ответили правильно!'),
+                                         random_id=random.randint(0, 2 ** 64))
+                    else:
+                        vk.messages.send(user_id=event.obj.message['from_id'],
+                                         message=('К сожалению, Вы ошиблись. Правильный ответ: {}'.format(answer)),
+                                         random_id=random.randint(0, 2 ** 64))
 
+                except Exception as e:
+                    print(e)
                 menu_type = 'main_menu'
 
             if menu_type == 'main_menu':
@@ -235,7 +276,6 @@ def main():
 
                 if text == 'Начать':
                     up = VkUpload(vk)
-                    mes = up.photo_messages('static/img/cities/pic{}.jpg'.format(str(1)))[0]
                     vk.messages.send(user_id=event.obj.message['from_id'],
                                      message=('Здравствуйте, {}'.format(response[0]['first_name'])),
                                      attachment=random.choice(get_photo((id_group, id_album))),
