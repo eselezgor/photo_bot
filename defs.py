@@ -76,6 +76,7 @@ def mailing_check():
     for mail in session.query(Mailing).all():
         if mail.next_send <= datetime.datetime.now():
             mail.next_send = datetime.datetime.now() + datetime.timedelta(days=(7 / mail.how_often))
+            session.commit()
             return mail.id
     return ''
 
