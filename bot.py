@@ -268,24 +268,27 @@ def main():
                 menu_type = 'main_menu'
 
             if menu_type == 'main_menu':
-                keyboard = add_button(keyboard, 'Фото по категориям', new_line=False)
-                keyboard = add_button(keyboard, 'Рассылка фото')
-                keyboard = add_button(keyboard, 'Тесты про фотографию')
-                keyboard = add_button(keyboard, 'Рассылка интересных фактов про фото')
-                keyboard = add_button(keyboard, 'Игры на внимательность')
+                try:
+                    keyboard = add_button(keyboard, 'Фото по категориям', new_line=False)
+                    keyboard = add_button(keyboard, 'Рассылка фото')
+                    keyboard = add_button(keyboard, 'Тесты про фотографию')
+                    keyboard = add_button(keyboard, 'Рассылка интересных фактов про фото')
+                    keyboard = add_button(keyboard, 'Игры на внимательность')
 
-                if text == 'Начать':
-                    up = VkUpload(vk)
-                    vk.messages.send(user_id=event.obj.message['from_id'],
-                                     message=('Здравствуйте, {}'.format(response[0]['first_name'])),
-                                     attachment=random.choice(get_photo((id_group, id_album))),
-                                     keyboard=keyboard.get_keyboard(),
-                                     random_id=random.randint(0, 2 ** 64))
-                else:
-                    vk.messages.send(user_id=event.obj.message['from_id'],
-                                     message=('Выберите категорию'),
-                                     keyboard=keyboard.get_keyboard(),
-                                     random_id=random.randint(0, 2 ** 64))
+                    if text == 'Начать':
+                        up = VkUpload(vk)
+                        vk.messages.send(user_id=event.obj.message['from_id'],
+                                         message=('Здравствуйте, {}'.format(response[0]['first_name'])),
+                                         attachment=random.choice(get_photo((id_group, id_album))),
+                                         keyboard=keyboard.get_keyboard(),
+                                         random_id=random.randint(0, 2 ** 64))
+                    else:
+                        vk.messages.send(user_id=event.obj.message['from_id'],
+                                         message=('Выберите категорию'),
+                                         keyboard=keyboard.get_keyboard(),
+                                         random_id=random.randint(0, 2 ** 64))
+                except Exception as e:
+                    print(e)
 
 
 if __name__ == '__main__':
