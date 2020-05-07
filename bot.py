@@ -38,17 +38,17 @@ def main():
                 except Exception as e:
                     print(e)
 
-            id = facts_check()
-            if not id == '':
-                vk = vk_session.get_api()
-                try:
+            try:
+                id = facts_check()
+                if not id == '':
+                    vk = vk_session.get_api()
                     f = codecs.open('static/facts.txt', 'r')
                     one_fact = f.read().split('**')
                     vk.messages.send(user_id=id,
                                      message=(random.choice(one_fact)),
                                      random_id=random.randint(0, 2 ** 64))
-                except Exception as e:
-                    print(e)
+            except Exception as e:
+                print(e)
 
             if event.type == VkBotEventType.MESSAGE_NEW:
                 vk = vk_session.get_api()
