@@ -25,7 +25,7 @@ def main():
     print(1)
 
     for event in longpoll.listen():
-        try:
+        if True:
 
             id = mailing_check()
             if not id == '':
@@ -53,8 +53,7 @@ def main():
 
             if event.type == VkBotEventType.MESSAGE_NEW:
                 vk = vk_session.get_api()
-                response = vk.users.get(user_id=event.obj.message['from_id'])
-                text = event.obj.message['text']
+                text = event.obj.text
                 keyboard = VkKeyboard(one_time=True)
 
                 if text == 'Фото по категориям':
@@ -62,7 +61,7 @@ def main():
                         keyboard = add_button(keyboard, 'Города', new_line=False)
                         keyboard = add_button(keyboard, 'Игры')
                         keyboard = add_button(keyboard, 'Горы')
-                        vk.messages.send(user_id=event.obj.message['from_id'],
+                        vk.messages.send(user_id=event.obj.from_id,
                                          message=('Выберите категорию'),
                                          keyboard=keyboard.get_keyboard(),
                                          random_id=random.randint(0, 2 ** 64))
@@ -87,7 +86,7 @@ def main():
                                          if os.path.isfile(os.path.join(path, f))])
 
                         mes = up.photo_messages('static/img/{}/pic{}.jpg'.format(group, str(random.randint(1, num_files))))[0]
-                        vk.messages.send(user_id=event.obj.message['from_id'],
+                        vk.messages.send(user_id=event.obj.from_id,
                                          message=(''),
                                          attachment=f"photo{mes['owner_id']}_{mes['id']}",
                                          random_id=random.randint(0, 2 ** 64))
@@ -101,7 +100,7 @@ def main():
                         keyboard = add_button(keyboard, 'Два раза в неделю')
                         keyboard = add_button(keyboard, 'Раз в неделю')
                         keyboard = add_button(keyboard, 'Отписаться от рассылки')
-                        vk.messages.send(user_id=event.obj.message['from_id'],
+                        vk.messages.send(user_id=event.obj.from_id,
                                          message=('Выберите частоту'),
                                          keyboard=keyboard.get_keyboard(),
                                          random_id=random.randint(0, 2 ** 64))
@@ -112,8 +111,8 @@ def main():
 
                 elif text == 'Отписаться от рассылки' and menu_type == 'mailing':
                     try:
-                        del_mailing(event.obj.message['from_id'])
-                        vk.messages.send(user_id=event.obj.message['from_id'],
+                        del_mailing(event.obj.from_id)
+                        vk.messages.send(user_id=event.obj.from_id,
                                          message=('Вы отписались от рассылки'),
                                          random_id=random.randint(0, 2 ** 64))
                     except Exception as e:
@@ -133,13 +132,13 @@ def main():
                         text_message = 'Вы подписались на рассылку фото {}. Чтобы отменить рассылку, выберите "Отисаться от' \
                                        ' рассылки" в меню "Рассылка фото"'.format(text.lower())
                         for user in session.query(mailing.Mailing).all():
-                            if user.id == event.obj.message['from_id']:
-                                del_mailing(event.obj.message['from_id'])
+                            if user.id == event.obj.from_id:
+                                del_mailing(event.obj.from_id)
                                 text_message = 'Вы поменяли частоту рассылки на {}. Чтобы отменить рассылку, выберите ' \
                                                '"Отисаться от рассылки" в меню "Рассылка фото"'.format(text.lower())
                                 break
-                        add_mailing(event.obj.message['from_id'], times_a_week)
-                        vk.messages.send(user_id=event.obj.message['from_id'],
+                        add_mailing(event.obj.from_id, times_a_week)
+                        vk.messages.send(user_id=event.obj.from_id,
                                          message=(text_message),
                                          random_id=random.randint(0, 2 ** 64))
                     except Exception as e:
@@ -155,7 +154,7 @@ def main():
                         keyboard = add_button(keyboard, answer_choice[2])
                         keyboard = add_button(keyboard, answer_choice[3])
 
-                        vk.messages.send(user_id=event.obj.message['from_id'],
+                        vk.messages.send(user_id=event.obj.from_id,
                                          message=(test[0]),
                                          keyboard=keyboard.get_keyboard(),
                                          random_id=random.randint(0, 2 ** 64))
@@ -168,11 +167,11 @@ def main():
                 elif menu_type == 'test':
                     try:
                         if text == answer:
-                            vk.messages.send(user_id=event.obj.message['from_id'],
+                            vk.messages.send(user_id=event.obj.from_id,
                                              message=('Поздравляем! Вы ответили правильно!'),
                                              random_id=random.randint(0, 2 ** 64))
                         else:
-                            vk.messages.send(user_id=event.obj.message['from_id'],
+                            vk.messages.send(user_id=event.obj.from_id,
                                              message=('К сожалению, Вы ошиблись. Правильный ответ: {}'.format(answer)),
                                              random_id=random.randint(0, 2 ** 64))
                     except Exception as e:
@@ -198,7 +197,7 @@ def main():
                 elif text == 'Отписаться от рассылки' and menu_type == 'facts':
                     try:
                         del_fact(event.obj.message['from_id'])
-                        vk.messages.send(user_id=event.obj.message['from_id'],
+                        vk.messages.send(user_id=event.obj.from_id,
                                          message=('Вы отписались от рассылки'),
                                          random_id=random.randint(0, 2 ** 64))
                     except Exception as e:
@@ -225,7 +224,7 @@ def main():
                                                '"Отисаться от рассылки" в меню "Рассылка фото"'.format(text.lower())
                                 break
                         add_facts(event.obj.message['from_id'], times_a_week)
-                        vk.messages.send(user_id=event.obj.message['from_id'],
+                        vk.messages.send(user_id=event.obj.from_id,
                                          message=(text_message),
                                          random_id=random.randint(0, 2 ** 64))
                     except Exception as e:
@@ -241,7 +240,7 @@ def main():
                         keyboard = add_button(keyboard, answer_choice[2])
                         keyboard = add_button(keyboard, answer_choice[3])
 
-                        vk.messages.send(user_id=event.obj.message['from_id'],
+                        vk.messages.send(user_id=event.obj.from_id,
                                          message=(game[1]),
                                          attachment='static/games/{}'.format(game[0]),
                                          keyboard=keyboard.get_keyboard(),
@@ -255,11 +254,11 @@ def main():
                 elif menu_type == 'game':
                     try:
                         if text == answer:
-                            vk.messages.send(user_id=event.obj.message['from_id'],
+                            vk.messages.send(user_id=event.obj.from_id,
                                              message=('Поздравляем! Вы ответили правильно!'),
                                              random_id=random.randint(0, 2 ** 64))
                         else:
-                            vk.messages.send(user_id=event.obj.message['from_id'],
+                            vk.messages.send(user_id=event.obj.from_id,
                                              message=('К сожалению, Вы ошиблись. Правильный ответ: {}'.format(answer)),
                                              random_id=random.randint(0, 2 ** 64))
 
@@ -276,21 +275,18 @@ def main():
                         keyboard = add_button(keyboard, 'Игры на внимательность')
 
                         if text == 'Начать':
-                            up = VkUpload(vk)
-                            vk.messages.send(user_id=event.obj.message['from_id'],
-                                             message=('Здравствуйте, {}'.format(response[0]['first_name'])),
+                            vk.messages.send(user_id=event.obj.from_id,
+                                             message=('Здравствуйте'),
                                              attachment=random.choice(get_photo((id_group, id_album))),
                                              keyboard=keyboard.get_keyboard(),
                                              random_id=random.randint(0, 2 ** 64))
                         else:
-                            vk.messages.send(user_id=event.obj.message['from_id'],
+                            vk.messages.send(user_id=event.obj.from_id,
                                              message=('Выберите категорию'),
                                              keyboard=keyboard.get_keyboard(),
                                              random_id=random.randint(0, 2 ** 64))
                     except Exception as e:
                         print(e)
-        except Exception as e:
-            print(e)
 
 
 if __name__ == '__main__':
