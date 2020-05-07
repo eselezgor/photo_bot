@@ -185,7 +185,7 @@ def main():
                         keyboard = add_button(keyboard, 'Два раза в неделю')
                         keyboard = add_button(keyboard, 'Раз в неделю')
                         keyboard = add_button(keyboard, 'Отписаться от рассылки')
-                        vk.messages.send(user_id=event.obj.message['from_id'],
+                        vk.messages.send(user_id=event.obj.from_id,
                                          message=('Выберите частоту'),
                                          keyboard=keyboard.get_keyboard(),
                                          random_id=random.randint(0, 2 ** 64))
@@ -196,7 +196,7 @@ def main():
 
                 elif text == 'Отписаться от рассылки' and menu_type == 'facts':
                     try:
-                        del_fact(event.obj.message['from_id'])
+                        del_fact(event.obj.from_id)
                         vk.messages.send(user_id=event.obj.from_id,
                                          message=('Вы отписались от рассылки'),
                                          random_id=random.randint(0, 2 ** 64))
@@ -218,12 +218,12 @@ def main():
                                        '"Отисаться от' \
                                        ' рассылки" в меню "Интересные факты про фото"'.format(text.lower())
                         for user in session.query(facts.Facts).all():
-                            if user.id == event.obj.message['from_id']:
-                                del_fact(event.obj.message['from_id'])
+                            if user.id == event.obj.from_id:
+                                del_fact(event.obj.from_id)
                                 text_message = 'Вы поменяли частоту рассылки на {}. Чтобы отменить рассылку, выберите ' \
                                                '"Отисаться от рассылки" в меню "Рассылка фото"'.format(text.lower())
                                 break
-                        add_facts(event.obj.message['from_id'], times_a_week)
+                        add_facts(event.obj.from_id, times_a_week)
                         vk.messages.send(user_id=event.obj.from_id,
                                          message=(text_message),
                                          random_id=random.randint(0, 2 ** 64))
