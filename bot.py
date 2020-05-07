@@ -42,7 +42,7 @@ def main():
                 f = codecs.open('static/facts.txt', 'r')
                 one_fact = f.read().split('**')
                 vk.messages.send(user_id=id,
-                                 message=(one_fact[random.randint(len(one_fact))]),
+                                 message=(one_fact[random.randint(0, len(one_fact))]),
                                  random_id=random.randint(0, 2 ** 64))
             except UnicodeDecodeError:
                 print('Опять какая-то непонятная ошибка')
